@@ -19,6 +19,7 @@ import com.example.administrator.util.PinYinUtil;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
+import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -34,9 +35,10 @@ import java.net.URL;
 public class MainActivity extends Activity implements View.OnClickListener{
 
     private static final int UPDATE_TODAY_WEATHER = 1;
-
+    private static final String TAG = "MiniWeather";
+    
     private ImageView mUpdateBtn;
-    private TextView cityTv,timeTv,temperatureTv,climateTv,humidityTv,weekdayTv,pmDataTv,pmQualityTv,windTv,cityNameTv;
+    private TextView cityTv,timeTv,temperatureTv,climateTv,humidityTv,weekdayTv,pmDataTv,pmQualityTv,windTv,cityNameTv,tempRangeTv;
     private ImageView weatherImg,pmImg;
 
     private Handler handler = new Handler(){
@@ -84,12 +86,41 @@ public class MainActivity extends Activity implements View.OnClickListener{
         pmQualityTv = (TextView)findViewById(R.id.pm25_level);
         windTv = (TextView)findViewById(R.id.today_wind);
         cityNameTv = (TextView)findViewById(R.id.title_city_name);
+        tempRangeTv = (TextView)findViewById(R.id.today_temp_range);
 
         weatherImg = (ImageView)findViewById(R.id.today_weather_img);
         pmImg = (ImageView)findViewById(R.id.pm25_level_img);
 
         //初始化
+        SharedPreferences lastData = getSharedPreferences("lastMsg",MODE_PRIVATE);
+        String city  = lastData.getString("city","");
+        String updateTime = lastData.getString("updatetime","");
+        String wendu = lastData.getString("wendu","");
+        String wencha = lastData.getString("wencha","");
+        String shidu = lastData.getString("shidu","");
+        String pm25 = lastData.getString("pm25","");
+        String pmQ = lastData.getString("pmQ","");
+        String date = lastData.getString("weekday","");
+        String type = lastData.getString("type","");
+        String wind = lastData.getString("wind","");
 
+        int pmImgId = lastData.getInt("pmImg",getResources().getIdentifier("biz_plugin_weather_0_50","drawable",getPackageName()));
+        int whrImgId = lastData.getInt("weatherImg",getResources().getIdentifier("biz_plugin_weather_qing","drawable",getPackageName()));
+
+        cityNameTv.setText(city+"天气");
+        cityTv.setText(city);
+        timeTv.setText(updateTime+"发布");
+        temperatureTv.setText("温度："+wendu+"°C");
+        tempRangeTv.setText(wencha);
+        humidityTv.setText("湿度："+shidu);
+        pmDataTv.setText(pm25);
+        pmQualityTv.setText(pmQ);
+        weekdayTv.setText(date);
+        climateTv.setText(type);
+        windTv.setText(wind);
+
+        weatherImg.setImageDrawable(getResources().getDrawable(whrImgId));
+        pmImg.setImageDrawable(getResources().getDrawable(pmImgId));
     }
 
     //解析xml
@@ -188,10 +219,9 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
         return todayWeather;
     }
-
+    //解析url
     private void queryWeatherCode(String cityCode){
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
-        Log.d("miniWeather",address);
 
         new Thread(new Runnable() {
             @Override
@@ -241,27 +271,33 @@ public class MainActivity extends Activity implements View.OnClickListener{
         pmDataTv.setText(todayWeather.getPm25());
         pmQualityTv.setText(todayWeather.getQuality());
         weekdayTv.setText(todayWeather.getDate());
-        temperatureTv.setText(todayWeather.getHigh()+"~"+todayWeather.getLow());
+        temperatureTv.setText("温度："+todayWeather.getWendu()+"°C");
+        tempRangeTv.setText(todayWeather.getLow()+"~"+todayWeather.getHigh());
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力："+todayWeather.getFengli());
 
-        
+
         int pm25_int = Integer.parseInt(todayWeather.getPm25());
+        int pmImgId = R.drawable.biz_plugin_weather_0_50;//保存pm25图片id
         //按pm25数值设置图片
         if(pm25_int <= 50){
             pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_0_50));
         }
         else if(pm25_int >50 && pm25_int <=100){
             pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_51_100));
+            pmImgId = R.drawable.biz_plugin_weather_51_100;
         }
         else if(pm25_int >100 && pm25_int <=150){
             pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_101_150));
+            pmImgId = R.drawable.biz_plugin_weather_101_150;
         }
         else if(pm25_int >150 && pm25_int <=200){
             pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_151_200));
+            pmImgId = R.drawable.biz_plugin_weather_151_200;
         }
         else if(pm25_int >200 && pm25_int <=300){
             pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_201_300));
+            pmImgId = R.drawable.biz_plugin_weather_201_300;
         }
         //按天气状态的拼音设置图片
         String climatePinyin = null;
@@ -271,6 +307,24 @@ public class MainActivity extends Activity implements View.OnClickListener{
             e.printStackTrace();
         }
         weatherImg.setImageDrawable(getResources().getDrawable(getResources().getIdentifier("biz_plugin_weather_"+climatePinyin,"drawable",getPackageName())));
+
+        //保存这次的更新信息
+        SharedPreferences lastSharedData = getSharedPreferences("lastMsg",MODE_PRIVATE);
+        SharedPreferences.Editor editor = lastSharedData.edit();
+        editor.putString("city",todayWeather.getCity());
+        editor.putString("updatetime",todayWeather.getUpdatetime());
+        editor.putString("shidu",todayWeather.getShidu());
+        editor.putString("wendu",todayWeather.getWendu());
+        editor.putString("wencha",todayWeather.getLow()+"~"+todayWeather.getHigh());
+        editor.putString("pm25",todayWeather.getPm25());
+        editor.putString("pmQ",todayWeather.getQuality());
+        editor.putString("weekday",todayWeather.getDate());
+        editor.putString("type",todayWeather.getType());
+        editor.putString("wind",todayWeather.getFengli());
+        editor.putInt("pmImg",pmImgId);
+        editor.putInt("weatherImg",getResources().getIdentifier("biz_plugin_weather_"+climatePinyin,"drawable",getPackageName()));
+
+        editor.commit();
     }
 
     @Override
@@ -281,7 +335,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
             Log.d("miniWeather",cityCode);
 
             if(NetUtil.getNetworkState(this) != NetUtil.NET_NONE){
-                Log.d("miniWeather","OK");
+
                 queryWeatherCode(cityCode);
             }
             else{
