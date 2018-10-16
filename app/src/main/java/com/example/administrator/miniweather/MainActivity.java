@@ -2,6 +2,7 @@ package com.example.administrator.miniweather;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +10,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +40,9 @@ public class MainActivity extends Activity implements View.OnClickListener{
     private static final String TAG = "MiniWeather";
     
     private ImageView mUpdateBtn;
+    private ImageView mSelectCityBtn;
+    private LinearLayout pm25Layout;
+
     private TextView cityTv,timeTv,temperatureTv,climateTv,humidityTv,weekdayTv,pmDataTv,pmQualityTv,windTv,cityNameTv,tempRangeTv;
     private ImageView weatherImg,pmImg;
 
@@ -56,8 +61,6 @@ public class MainActivity extends Activity implements View.OnClickListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_info);
 
-        mUpdateBtn = (ImageView)findViewById(R.id.title_update_btn);
-        mUpdateBtn.setOnClickListener(this);
 
         /**
          * 判断网络是否连接
@@ -76,6 +79,14 @@ public class MainActivity extends Activity implements View.OnClickListener{
     }
     //初始化界面
     void initView(){
+        pm25Layout = (LinearLayout)findViewById(R.id.pm25);
+
+        mUpdateBtn = (ImageView)findViewById(R.id.title_update_btn);
+        mUpdateBtn.setOnClickListener(this);
+
+        mSelectCityBtn = (ImageView)findViewById(R.id.title_city_manager);
+        mSelectCityBtn.setOnClickListener(this);
+
         cityTv = (TextView)findViewById(R.id.today_city);
         timeTv = (TextView)findViewById(R.id.today_time);
         temperatureTv = (TextView)findViewById(R.id.today_temperature);
@@ -93,19 +104,27 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
         //初始化
         SharedPreferences lastData = getSharedPreferences("lastMsg",MODE_PRIVATE);
-        String city  = lastData.getString("city","");
-        String updateTime = lastData.getString("updatetime","");
-        String wendu = lastData.getString("wendu","");
-        String wencha = lastData.getString("wencha","");
-        String shidu = lastData.getString("shidu","");
-        String pm25 = lastData.getString("pm25","");
-        String pmQ = lastData.getString("pmQ","");
-        String date = lastData.getString("weekday","");
-        String type = lastData.getString("type","");
-        String wind = lastData.getString("wind","");
+        String city  = lastData.getString("city","N/A");
+        String updateTime = lastData.getString("updatetime","N/A");
+        String wendu = lastData.getString("wendu","N/A");
+        String wencha = lastData.getString("wencha","N/A");
+        String shidu = lastData.getString("shidu","N/A");
+        String pm25 = lastData.getString("pm25","N/A");
+        String pmQ = lastData.getString("pmQ","N/A");
+        String date = lastData.getString("weekday","N/A");
+        String type = lastData.getString("type","N/A");
+        String wind = lastData.getString("wind","N/A");
 
         int pmImgId = lastData.getInt("pmImg",getResources().getIdentifier("biz_plugin_weather_0_50","drawable",getPackageName()));
         int whrImgId = lastData.getInt("weatherImg",getResources().getIdentifier("biz_plugin_weather_qing","drawable",getPackageName()));
+
+        if(pmImgId == 0){
+            pm25Layout.setVisibility(View.GONE);
+        }
+        else{
+            pm25Layout.setVisibility(View.VISIBLE);
+            pmImg.setImageDrawable(getResources().getDrawable(pmImgId));
+        }
 
         cityNameTv.setText(city+"天气");
         cityTv.setText(city);
@@ -120,7 +139,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         windTv.setText(wind);
 
         weatherImg.setImageDrawable(getResources().getDrawable(whrImgId));
-        pmImg.setImageDrawable(getResources().getDrawable(pmImgId));
+
     }
 
     //解析xml
@@ -190,12 +209,12 @@ public class MainActivity extends Activity implements View.OnClickListener{
                             }
                             else if(xmlPullParser.getName().equals("high") && highCnt == 0){//最高温
                                 eventType = xmlPullParser.next();
-                                todayWeather.setHigh(xmlPullParser.getText());
+                                todayWeather.setHigh(xmlPullParser.getText().substring(2).trim());
                                 highCnt++;
                             }
                             else if(xmlPullParser.getName().equals("low") && lowCnt == 0){//最低温
                                 eventType = xmlPullParser.next();
-                                todayWeather.setLow(xmlPullParser.getText());
+                                todayWeather.setLow(xmlPullParser.getText().substring(2).trim());
                                 lowCnt++;
                             }
                             else if(xmlPullParser.getName().equals("type") && typeCnt == 0){//类别
@@ -276,29 +295,37 @@ public class MainActivity extends Activity implements View.OnClickListener{
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力："+todayWeather.getFengli());
 
+        //Log.d(TAG, "updateWeatherInfo: pm25:"+todayWeather.getPm25());
+        int pmImgId = 0;
+        if(todayWeather.getPm25() == null){
+            pm25Layout.setVisibility(View.GONE);
+        }
+        else{
+            pm25Layout.setVisibility(View.VISIBLE);
+            int pm25_int = Integer.parseInt(todayWeather.getPm25());
+            pmImgId = R.drawable.biz_plugin_weather_0_50;//保存pm25图片id
+            //按pm25数值设置图片
+            if(pm25_int <= 50){
+                pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_0_50));
+            }
+            else if(pm25_int >50 && pm25_int <=100){
+                pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_51_100));
+                pmImgId = R.drawable.biz_plugin_weather_51_100;
+            }
+            else if(pm25_int >100 && pm25_int <=150){
+                pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_101_150));
+                pmImgId = R.drawable.biz_plugin_weather_101_150;
+            }
+            else if(pm25_int >150 && pm25_int <=200){
+                pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_151_200));
+                pmImgId = R.drawable.biz_plugin_weather_151_200;
+            }
+            else if(pm25_int >200 && pm25_int <=300){
+                pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_201_300));
+                pmImgId = R.drawable.biz_plugin_weather_201_300;
+            }
+        }
 
-        int pm25_int = Integer.parseInt(todayWeather.getPm25());
-        int pmImgId = R.drawable.biz_plugin_weather_0_50;//保存pm25图片id
-        //按pm25数值设置图片
-        if(pm25_int <= 50){
-            pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_0_50));
-        }
-        else if(pm25_int >50 && pm25_int <=100){
-            pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_51_100));
-            pmImgId = R.drawable.biz_plugin_weather_51_100;
-        }
-        else if(pm25_int >100 && pm25_int <=150){
-            pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_101_150));
-            pmImgId = R.drawable.biz_plugin_weather_101_150;
-        }
-        else if(pm25_int >150 && pm25_int <=200){
-            pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_151_200));
-            pmImgId = R.drawable.biz_plugin_weather_151_200;
-        }
-        else if(pm25_int >200 && pm25_int <=300){
-            pmImg.setImageDrawable(getResources().getDrawable(R.drawable.biz_plugin_weather_201_300));
-            pmImgId = R.drawable.biz_plugin_weather_201_300;
-        }
         //按天气状态的拼音设置图片
         String climatePinyin = null;
         try {
@@ -329,7 +356,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        if(v.getId()==R.id.title_update_btn){
+        if(v.getId() == R.id.title_update_btn){
             SharedPreferences sharedPreferences = getSharedPreferences("config",MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code","101010100");
             Log.d("miniWeather",cityCode);
@@ -337,6 +364,36 @@ public class MainActivity extends Activity implements View.OnClickListener{
             if(NetUtil.getNetworkState(this) != NetUtil.NET_NONE){
 
                 queryWeatherCode(cityCode);
+            }
+            else{
+                Log.d("miniWeather","FAIL");
+                Toast.makeText(MainActivity.this,"FAIL",Toast.LENGTH_LONG).show();
+            }
+        }
+        if(v.getId() == R.id.title_city_manager){
+            Intent intent = new Intent(this,SelectCityActivity.class);
+            startActivityForResult(intent,1);
+        }
+    }
+    protected void onActivityResult(int requestCode,int resultCode,Intent data){
+        if(requestCode == 1 && resultCode == RESULT_OK){//选择城市的代码
+            String newCityCode = data.getStringExtra("cityCode");
+            Log.d(TAG, "onActivityResult: "+newCityCode);
+
+            //保存这次的城市代码
+            SharedPreferences cityInfo = getSharedPreferences("savedCityInfo",MODE_PRIVATE);
+            SharedPreferences.Editor editor = cityInfo.edit();
+            editor.putString("city_code",newCityCode);
+            editor.commit();
+
+
+            SharedPreferences codeInfo = getSharedPreferences("savedCityInfo",MODE_PRIVATE);
+            String cityCode = codeInfo.getString("city_code","");
+            Toast.makeText(MainActivity.this,cityCode,Toast.LENGTH_LONG).show();
+
+            if(NetUtil.getNetworkState(this) != NetUtil.NET_NONE){
+
+                queryWeatherCode(newCityCode);
             }
             else{
                 Log.d("miniWeather","FAIL");

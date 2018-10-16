@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="45.0dip"
+        android:background="#ffcd2626"
+        android:id="@+id/title_bar">
+
+        <TextView
+            android:id="@+id/title_name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="0dp"
+            android:gravity="center"
+            android:text="当前城市："
+            android:textColor="#ffffffff"
+            android:textSize="20.0dip" />
+
+        <ImageView
+            android:layout_width="45.0dip"
+            android:layout_height="45.0dip"
+            android:id="@+id/title_back"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/base_action_bar_back_normal"/>
+        <ImageView
+            android:layout_width="1.0dip"
+            android:layout_height="40.0dip"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_toRightOf="@id/title_back"
+            android:background="#A71717"
+            android:gravity="center"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title_bar">
+        <com.example.administrator.widget.ClearEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/search_city"
+            android:layout_margin="4dp"
+            android:hint="搜索城市"
+            android:drawableLeft="@drawable/magnifying_glass"
+            android:drawablePadding="6dp"
+            android:background="@drawable/contact_search_box_edittext_keyword_background"
+            android:textColor="#ff000000"
+            android:textColorHint="#ffcccccc"
+            android:textSize="15dp"/>
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/search_city"
+            android:id="@+id/city_list"
+            android:background="#ffffff">
+
+        </ListView>
+    </RelativeLayout>
+</RelativeLayout>
