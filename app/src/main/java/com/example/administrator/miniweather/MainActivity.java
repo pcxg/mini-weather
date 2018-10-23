@@ -1,6 +1,7 @@
 package com.example.administrator.miniweather;
 
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,6 +10,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -42,6 +46,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
     private ImageView mUpdateBtn;
     private ImageView mSelectCityBtn;
     private LinearLayout pm25Layout;
+    private ObjectAnimator updateAnim;
 
     private TextView cityTv,timeTv,temperatureTv,climateTv,humidityTv,weekdayTv,pmDataTv,pmQualityTv,windTv,cityNameTv,tempRangeTv;
     private ImageView weatherImg,pmImg;
@@ -49,7 +54,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
     private Handler handler = new Handler(){
         public void handleMessage(android.os.Message msg){
             switch(msg.what){
-                case UPDATE_TODAY_WEATHER:
+                case UPDATE_TODAY_WEATHER://更新主页的天气信息
                     updateWeatherInfo((TodayWeather)msg.obj);
                     break;
             }
@@ -84,6 +89,11 @@ public class MainActivity extends Activity implements View.OnClickListener{
         mUpdateBtn = (ImageView)findViewById(R.id.title_update_btn);
         mUpdateBtn.setOnClickListener(this);
 
+        updateAnim = ObjectAnimator.ofFloat(mUpdateBtn,"rotation",0,360);
+        updateAnim.setDuration(3000);
+        updateAnim.setRepeatCount(5);
+        updateAnim.setRepeatMode(ObjectAnimator.RESTART);
+
         mSelectCityBtn = (ImageView)findViewById(R.id.title_city_manager);
         mSelectCityBtn.setOnClickListener(this);
 
@@ -102,7 +112,8 @@ public class MainActivity extends Activity implements View.OnClickListener{
         weatherImg = (ImageView)findViewById(R.id.today_weather_img);
         pmImg = (ImageView)findViewById(R.id.pm25_level_img);
 
-        //初始化
+
+        //用最后一次打开时的数据进行初始化
         SharedPreferences lastData = getSharedPreferences("lastMsg",MODE_PRIVATE);
         String city  = lastData.getString("city","N/A");
         String updateTime = lastData.getString("updatetime","N/A");
@@ -117,7 +128,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
         int pmImgId = lastData.getInt("pmImg",getResources().getIdentifier("biz_plugin_weather_0_50","drawable",getPackageName()));
         int whrImgId = lastData.getInt("weatherImg",getResources().getIdentifier("biz_plugin_weather_qing","drawable",getPackageName()));
-
+        //若该城市没有pm25指标，则不显示pm25Layout
         if(pmImgId == 0){
             pm25Layout.setVisibility(View.GONE);
         }
@@ -136,7 +147,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         pmQualityTv.setText(pmQ);
         weekdayTv.setText(date);
         climateTv.setText(type);
-        windTv.setText(wind);
+        windTv.setText("风力："+wind);
 
         weatherImg.setImageDrawable(getResources().getDrawable(whrImgId));
 
@@ -240,7 +251,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
     }
     //解析url
     private void queryWeatherCode(String cityCode){
-        final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
+        final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;//通过该接口获取天气信息
 
         new Thread(new Runnable() {
             @Override
@@ -248,6 +259,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
                 HttpURLConnection connection = null;
                 TodayWeather todayWeather = null;
                 try{
+                    //建立http连接，获取response数据
                     URL url = new URL(address);
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
@@ -265,12 +277,16 @@ public class MainActivity extends Activity implements View.OnClickListener{
                     Log.d("miniWeather",responseStr);
 
                     todayWeather = parseXML(responseStr);//解析xml
-                    if(todayWeather !=null){
+                    Log.d(TAG, "city: "+todayWeather.getCity());
+                    if(todayWeather.getCity() !=null){
+                        //返回数据给handler
                         Message msg = new Message();
                         msg.what = UPDATE_TODAY_WEATHER;
                         msg.obj = todayWeather;
                         handler.sendMessage(msg);
                     }
+                    else
+                        Toast.makeText(MainActivity.this,"无法获取天气信息!",Toast.LENGTH_LONG).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }finally {
@@ -296,7 +312,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         windTv.setText("风力："+todayWeather.getFengli());
 
         //Log.d(TAG, "updateWeatherInfo: pm25:"+todayWeather.getPm25());
-        int pmImgId = 0;
+        int pmImgId = 0;//默认设pm25指标不存在
         if(todayWeather.getPm25() == null){
             pm25Layout.setVisibility(View.GONE);
         }
@@ -330,6 +346,7 @@ public class MainActivity extends Activity implements View.OnClickListener{
         String climatePinyin = null;
         try {
             climatePinyin = new PinYinUtil().toPinYin(todayWeather.getType(),"",PinYinUtil.PinYinType.LOWERCASE);
+            //Log.d(TAG, "updateWeatherInfo: "+climatePinyin);
         } catch (BadHanyuPinyinOutputFormatCombination e) {
             e.printStackTrace();
         }
@@ -356,14 +373,17 @@ public class MainActivity extends Activity implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.title_update_btn){
-            SharedPreferences sharedPreferences = getSharedPreferences("config",MODE_PRIVATE);
-            String cityCode = sharedPreferences.getString("main_city_code","101010100");
+        if(v.getId() == R.id.title_update_btn){//点击更新按钮则更新信息
+            SharedPreferences sharedPreferences = getSharedPreferences("savedCityInfo",MODE_PRIVATE);
+            String cityCode = sharedPreferences.getString("city_code","101010100");
             Log.d("miniWeather",cityCode);
+
+            updateAnim.start();//点击更新后旋转图片
 
             if(NetUtil.getNetworkState(this) != NetUtil.NET_NONE){
 
                 queryWeatherCode(cityCode);
+                //updateAnim.end();
             }
             else{
                 Log.d("miniWeather","FAIL");
@@ -386,10 +406,6 @@ public class MainActivity extends Activity implements View.OnClickListener{
             editor.putString("city_code",newCityCode);
             editor.commit();
 
-
-            SharedPreferences codeInfo = getSharedPreferences("savedCityInfo",MODE_PRIVATE);
-            String cityCode = codeInfo.getString("city_code","");
-            Toast.makeText(MainActivity.this,cityCode,Toast.LENGTH_LONG).show();
 
             if(NetUtil.getNetworkState(this) != NetUtil.NET_NONE){
 

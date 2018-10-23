@@ -17,7 +17,7 @@ public class PinYinUtil {
         LOWERCASE,
         FIRSTUPPER
     }
-
+    //默认为大写无声调
     public PinYinUtil(){
         format = new HanyuPinyinOutputFormat();
         format.setCaseType(HanyuPinyinCaseType.UPPERCASE);
@@ -45,7 +45,7 @@ public class PinYinUtil {
         String[] t;
         for(int i = 0;i<string.length();i++){
             char c = string.charAt(i);
-            if((int)c <=128){
+            if((int)c <= 128){
                 pinyin += c;
             }
             else{

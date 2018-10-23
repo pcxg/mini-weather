@@ -47,6 +47,8 @@ public class MyApplication extends Application {
             i++;
             String cityName = city.getCity();
             String cityCode = city.getNumber();
+            String py = city.getAllPY();
+            //Log.d(TAG, "prepareCityList: "+py);
             //Log.d(TAG, "prepareCityList: "+cityCode+":"+cityName);
         }
         Log.d(TAG, "prepareCityList: "+i);
@@ -57,6 +59,7 @@ public class MyApplication extends Application {
         return myApplication;
     }
 
+    //打开数据库文件存放位置，若不存在则新建，将city.db内容复制到指定位置
     private CityDB openCityDB(){
         String path = "/data"+Environment.getDataDirectory().getAbsolutePath()
                 +File.separator+getPackageName()

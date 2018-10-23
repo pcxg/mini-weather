@@ -17,7 +17,7 @@ public class CityDB {
     public CityDB(Context context, String path) {
         db = context.openOrCreateDatabase(path,Context.MODE_PRIVATE,null);
     }
-    //查city表
+    //查city表,返回city对象组成的list
     public List<City> getAllCity(){
         List<City> list = new ArrayList<City>();
         Cursor c = db.rawQuery("SELECT * from "+CITY_TABLE_NAME,null);

@@ -92,7 +92,7 @@ public class ClearEditText extends android.support.v7.widget.AppCompatEditText i
     /*
     * 设置晃动动画*/
     public void setShakeAnimation(){
-        this.setAnimation(shakeAnimation(5));
+        this.startAnimation(shakeAnimation(5));
     }
 
     private Animation shakeAnimation(int count) {

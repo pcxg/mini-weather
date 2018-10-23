@@ -1,5 +1,8 @@
 package com.example.administrator.bean;
 
+/**
+ * 城市实体类
+ */
 public class City {
     private String province;
     private String city;

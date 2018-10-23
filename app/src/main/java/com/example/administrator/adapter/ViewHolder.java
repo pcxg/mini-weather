@@ -24,7 +24,7 @@ public class ViewHolder {
             return new ViewHolder(context,parent,layoutId,position);
         else{
             ViewHolder holder = (ViewHolder)convertView.getTag();
-            holder.mPosition = position;
+            holder.mPosition = position;//更新position
             return holder;
         }
     }

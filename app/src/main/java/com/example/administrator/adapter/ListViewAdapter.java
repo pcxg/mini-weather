@@ -8,6 +8,10 @@ import android.widget.BaseAdapter;
 
 import java.util.List;
 
+/**
+ * 通用的ListView的BaseAdapter
+ * @param <T>
+ */
 public abstract class ListViewAdapter<T> extends BaseAdapter {
 
     protected Context mContext;
@@ -39,7 +43,7 @@ public abstract class ListViewAdapter<T> extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder viewHolder = ViewHolder.get(mContext,convertView,parent,layoutId,position);
+        ViewHolder viewHolder = ViewHolder.get(mContext,convertView,parent,layoutId,position);//初始化ViewHolder
         convert(viewHolder,getItem(position));
         return viewHolder.getConvertView();
     }

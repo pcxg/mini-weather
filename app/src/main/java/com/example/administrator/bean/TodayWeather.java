@@ -1,5 +1,8 @@
 package com.example.administrator.bean;
 
+/**
+ * 今日天气界面实体类
+ */
 public class TodayWeather {
     private String city;
     private String updatetime;

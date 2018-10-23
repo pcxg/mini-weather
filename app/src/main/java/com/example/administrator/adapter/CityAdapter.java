@@ -8,11 +8,15 @@ import com.example.administrator.miniweather.R;
 
 import java.util.List;
 
+/**
+ * 城市列表的ListView的适配器类
+ */
 public class CityAdapter extends ListViewAdapter<City> {
 
     public CityAdapter(Context context, List<City> data) {
         super(context, data, R.layout.city_item);
     }
+
 
     @Override
     public void convert(ViewHolder holder, City city) {
