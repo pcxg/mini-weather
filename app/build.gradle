@@ -1,6 +1,23 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'miniW'
+            storeFile file('C:/AS_apk_keys/miniWeather.jks')
+            keyPassword 'android'
+            storePassword 'android'
+        }
+        config_debug {
+            storeFile file('E:/Android_AVD/.android/debug.keystore')
+        }
+        config_new {
+            keyAlias 'test'
+            keyPassword 'android'
+            storeFile file('E:/Android_keys/miniw.jks')
+            storePassword 'android'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.administrator.miniweather"
@@ -9,12 +26,24 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.config_new
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config_new
         }
+        debug {
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDir 'libs'
+            //说明so的路径为该libs路径，关联所有地图SDK的so文件
+        }
+    }
+    productFlavors {
     }
 }
 
@@ -25,4 +54,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.belerweb:pinyin4j:2.5.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation files('libs/BaiduLBS_Android.jar')
 }

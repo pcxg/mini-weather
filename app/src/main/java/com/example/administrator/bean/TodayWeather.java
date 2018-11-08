@@ -1,9 +1,12 @@
 package com.example.administrator.bean;
 
+import java.util.List;
+
 /**
  * 今日天气界面实体类
  */
 public class TodayWeather {
+    //今日天气信息
     private String city;
     private String updatetime;
     private String wendu;
@@ -16,6 +19,13 @@ public class TodayWeather {
     private String high;
     private String low;
     private String type;
+
+    //更新：包括昨天在内的6天天气信息
+    private List<String> dates;
+    private List<String> types;
+    private List<String> highs;
+    private List<String> lows;
+    private List<String> fenglis;
 
     public String getCity() {
         return city;
@@ -113,6 +123,46 @@ public class TodayWeather {
         this.type = type;
     }
 
+
+    public List<String> getDates() {
+        return dates;
+    }
+
+    public void setDates(List<String> dates) {
+        this.dates = dates;
+    }
+
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
+    }
+
+    public List<String> getHighs() {
+        return highs;
+    }
+
+    public void setHighs(List<String> highs) {
+        this.highs = highs;
+    }
+
+    public List<String> getLows() {
+        return lows;
+    }
+
+    public void setLows(List<String> lows) {
+        this.lows = lows;
+    }
+
+    public List<String> getFenglis() {
+        return fenglis;
+    }
+
+    public void setFenglis(List<String> fenglis) {
+        this.fenglis = fenglis;
+    }
 
     @Override
     public String toString() {

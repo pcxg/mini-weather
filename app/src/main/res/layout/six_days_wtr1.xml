@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <include layout="@layout/single_day_wtr"
+        android:id="@+id/single_day1"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"/>
+    <include layout="@layout/single_day_wtr"
+        android:id="@+id/single_day2"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"/>
+    <include layout="@layout/single_day_wtr"
+        android:id="@+id/single_day3"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"/>
+</LinearLayout>

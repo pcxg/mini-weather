@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    >
+    <TextView
+        android:id="@+id/day_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="星期一"
+        android:textColor="#ffffffff"/>
+    <ImageView
+        android:id="@+id/day_weather_img"
+        android:scaleType="centerInside"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/biz_plugin_weather_duoyun"/>
+    <TextView
+        android:id="@+id/day_temp_range"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:textColor="#ffffffff"
+        android:text="5°C~4°C" />
+    <TextView
+        android:id="@+id/day_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#ffffffff"
+        android:text="多云" />
+    <TextView
+        android:id="@+id/day_wind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#ffffffff"
+        android:text="微风" />
+</LinearLayout>
