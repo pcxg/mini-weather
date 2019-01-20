@@ -510,7 +510,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
 
                     todayWeather = parseXML(responseStr);//解析xml
                     Log.d(TAG, "city: "+todayWeather.getCity());
-                    if(todayWeather.getCity() !=null){
+                    if(todayWeather.getCity() != null){
                         //返回数据给handler
                         Message msg = new Message();
                         msg.what = UPDATE_TODAY_WEATHER;
@@ -599,6 +599,7 @@ public class MainActivity extends Activity implements View.OnClickListener,ViewP
         List<Integer> type_ids = new ArrayList<>();
 
         for(int i=0;i<6;i++){
+            singleViews.get(i).setVisibility(View.VISIBLE);
             TextView dayText = (TextView)singleViews.get(i).findViewById(R.id.day_date);
             dayText.setText(dates.get(i));
             TextView tempText = (TextView)singleViews.get(i).findViewById(R.id.day_temp_range);
